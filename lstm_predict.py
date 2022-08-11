@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import json
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 
@@ -67,6 +68,6 @@ def predict(begin, end, features, OHLC, predict_ticket, ratio_of_train, look_bac
     js = {
     'mse': mse,
     'rmse': rmse,
-    'predict_data_train': train_result['BTC Price Predictions'].to_json(orient='index'),
-    'predict_data_test': test_result['BTC Price Predictions'].to_json(orient='index')}
+    'predict_data_train': json.loads(train_result['BTC Price Predictions'].to_json(orient='index')),
+    'predict_data_test': json.loads(test_result['BTC Price Predictions'].to_json(orient='index'))}
     return js
