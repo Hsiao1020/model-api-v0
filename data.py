@@ -27,3 +27,10 @@ def split_sequence(data, look_back, forecast_days):
         X.append(data[i:(i+look_back)])
         Y.append(data[i+look_back][0])
     return np.array(X), np.array(Y).reshape((np.array(Y).shape[0], 1))
+
+def dataframe_to_json(df, column_name):
+    result = []
+    dt_index = df.index.view(np.int64) // 10**6
+    for i in range(len(df)):
+        result.append([int(dt_index[i]), float(df[column_name][i])])
+    return result

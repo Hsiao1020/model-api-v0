@@ -1,9 +1,10 @@
 from distutils.log import debug
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from lstm_predict import predict
 
 app = Flask(__name__)
-
+CORS(app=app)
 
 @app.route("/")
 def home():
