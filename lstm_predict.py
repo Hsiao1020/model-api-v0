@@ -6,6 +6,7 @@ from sklearn.metrics import mean_squared_error
 
 from data import get_price_data, move_to_first_column, divide_into_train_and_test, split_sequence, dataframe_to_json
 from model import build_LSTM_Model
+import json
 
 
 def predict(begin, end, features, OHLC, predict_ticket, ratio_of_train, look_back, forecast_days, layers, learning_rate, epochs, batch_size):
@@ -73,9 +74,15 @@ def predict(begin, end, features, OHLC, predict_ticket, ratio_of_train, look_bac
     rmse = np.sqrt(mse)
     print(f"mse: {mse}")
     print(f"rmse: {rmse}")
+    logs = list()
+    with open("./tensorflow.log", "r") as f:
+        logs = f.readlines()
+
     js = {
         'mse': mse,
         'rmse': rmse,
         'predict_data_train': dataframe_to_json(train_result, 'BTC Price Predictions'),
         'predict_data_test': dataframe_to_json(test_result, 'BTC Price Predictions')}
+    # with open("./tensorflow.log", "w") as f:
+    #     pass
     return js

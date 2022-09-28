@@ -1,17 +1,22 @@
 from distutils.log import debug
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, abort
 from flask_cors import CORS
 from lstm_predict import predict
-
+from index import calculate_all_index, calculate_index, calculate_moving_average
 app = Flask(__name__)
 CORS(app=app)
 
+
 @app.route("/")
 def home():
-    return "Hello World"
+    return "請不要關掉 app.py 拜託 感謝~"
 
+# @app.before_request
+# def limit_remote_addr():
+#     if not request.remote_addr.startswith('140.119'):
+#         abort(404)  # Forbidden
 
-@app.route("/predict/lstm", methods=["POST"])
+@app.route("/predict", methods=["POST"])
 def lstm_predict():
     params = request.get_json()
     print(params)
@@ -48,9 +53,67 @@ def lstm_predict():
 
         return jsonify(predict_data)
 
+@app.route("/index/all", methods=["POST"])
+def get_index_all():
+    params = request.get_json()
+    print(params)
+    if not params:
+        return jsonify({"Error": "Can't find any parameters"})
+    else:
+        BEGIN = params['begin']
+        END = params['end']
+        FEATURE = params['feature']
+        all_index = calculate_all_index(
+            begin=BEGIN,
+            end=END,
+            feature=FEATURE
+        )
+
+        return jsonify(all_index)
+
+@app.route("/index", methods=["POST"])
+def get_index():
+    params = request.get_json()
+    print(params)
+    if not params:
+        return jsonify({"Error": "Can't find any parameters"})
+    else:
+        BEGIN = params['begin']
+        END = params['end']
+        FEATURE = params['feature']
+        INDEX = params['index']
+        index = calculate_index(
+            begin=BEGIN,
+            end=END,
+            feature=FEATURE,
+            index=INDEX
+        )
+
+        return jsonify(index)
+
+@app.route("/index/ma", methods=["POST"])
+def get_moving_average():
+    params = request.get_json()
+    print(params)
+    if not params:
+        return jsonify({"Error": "Can't find any parameters"})
+    else:
+        BEGIN = params['begin']
+        END = params['end']
+        FEATURE = params['feature']
+        TIMEPERIOD = params['timeperiod']
+        index = calculate_moving_average(
+            begin=BEGIN,
+            end=END,
+            feature=FEATURE,
+            timeperiod=TIMEPERIOD
+        )
+
+        return jsonify(index)
+
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
 
 
 # example params
