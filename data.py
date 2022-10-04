@@ -37,6 +37,6 @@ def dataframe_to_json(df, column_name):
     result = []
     dt_index = df.index.view(np.int64) // 10**6
     for i in range(len(df)):
-        if df[column_name][i] != 'Nan':
+        if not np.isnan(df[column_name][i]):
             result.append([int(dt_index[i]), float(df[column_name][i])])
     return result

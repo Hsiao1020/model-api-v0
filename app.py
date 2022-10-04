@@ -11,10 +11,10 @@ CORS(app=app)
 def home():
     return "請不要關掉 app.py 拜託 感謝~"
 
-# @app.before_request
-# def limit_remote_addr():
-#     if not request.remote_addr.startswith('140.119'):
-#         abort(404)  # Forbidden
+@app.before_request
+def limit_remote_addr():
+    if not request.remote_addr.startswith('140.119'):
+        abort(404)  # Forbidden
 
 @app.route("/predict", methods=["POST"])
 def lstm_predict():
@@ -28,6 +28,7 @@ def lstm_predict():
         FEATURES = params['features']
         OHLC = params['OHLC']
         PREDICTED_TICKET = params['predicted_ticket'].upper()
+        INDEX_FEATURES = params['index_features']
         RATIO_OF_TRAIN = params['ratio_of_train']
         LOOK_BACK = params['look_back']
         FORECAST_DAYS = params['forecast_days']
@@ -42,6 +43,7 @@ def lstm_predict():
             features=FEATURES,
             OHLC=OHLC,
             predict_ticket=PREDICTED_TICKET,
+            index_features=INDEX_FEATURES,
             ratio_of_train=RATIO_OF_TRAIN,
             look_back=LOOK_BACK,
             forecast_days=FORECAST_DAYS,
@@ -113,18 +115,20 @@ def get_moving_average():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run_server(debug=True, host='0.0.0.0', port=8888)
+    # app.run(debug=True)
 
 
 # example params
-schema = {
-    "begin": "2018-07-27",
+{
+    "begin": "2020-07-27",
     "end": "2022-07-28",
     "ratio_of_train": 0.7,
     "look_back": 5,
     "forecast_days": 1,
     "OHLC": "Adj Close",
-    "features": ["BTC-USD", "^DJI", "^GSPC", "MWL=F"],
+    "features": ["BTC-USD", "^DJI", "^GSPC"],
+    "index_features": ["BBANDS", "MA"],
     "predicted_ticket": "BTC-USD",
     "layers": [
         {"units": 50, "dropout": 0.2}
@@ -133,3 +137,4 @@ schema = {
     "epochs": 50,
     "batch_size": 32
 }
+

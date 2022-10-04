@@ -39,31 +39,39 @@ def calculate_all_index(begin, end, feature):
 
 
 def calculate_index(begin, end, feature, index):
-    ta_list = talib.get_functions()
-    ta_list.remove('MAVP')
-    if index not in ta_list:
-        return {"error": "Can't find this index"}
-
     df = get_price_data(begin, end, [feature])
     df.rename(columns={'Open': 'open', 'High': 'high', 'Low': 'low', 'Close': 'close', 'Volume': 'volume'}, inplace=True)
     df = df.astype('float')
-    output = eval('abstract.'+index+'(df)')
-    # 如果輸出是一維資料，幫這個指標取名為 x 本身；多維資料則不需命名
-    output.name = index.lower() if type(output) == pd.core.series.Series else None
-    df_output = pd.DataFrame(output)
+
+    ta_list = talib.get_functions()
+    ta_list.remove('MAVP')
+
+    for i in index:
+        if i not in ta_list:
+            return {"error": f"Can't find index {i}"}
+        # try:
+        output = eval('abstract.'+i+'(df)')
+        # 如果輸出是一維資料，幫這個指標取名為 x 本身；多維資料則不需命名
+        output.name = i.lower() if type(output) == pd.core.series.Series else None
+        # 透過 merge 把輸出結果併入 df DataFrame
+        # df_output = pd.concat([df_output, output], axis=1)
+        df = pd.concat([df, output], axis=1)
+        # except:
+        #     print(f'error: {index}')
 
     index_data = {}
-    for i in df_output.columns:
+    for i in df.columns:
         if i in ['open', 'high', 'low', 'close', 'Adj Close', 'volume']:
             pass
         else:
-            index_data[i] = dataframe_to_json(df_output, i)
+            index_data[i] = dataframe_to_json(df, i)
+
     return {
         "begin": begin,
         "end": end,
         "feature": feature,
         "index": index,
-        "index": index_data
+        "index_data": index_data
     }
 
 
@@ -72,7 +80,6 @@ def calculate_moving_average(begin, end, feature, timeperiod):
     result = talib.MA(df.Close, timeperiod).to_frame()
 
     moving_average = dataframe_to_json(result, 0)
-
     return {
         "begin": begin,
         "end": end,
