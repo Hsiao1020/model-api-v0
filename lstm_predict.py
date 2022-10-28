@@ -104,7 +104,8 @@ def predict(begin, end, features, OHLC, predict_ticket, index_features, ratio_of
         'rmse': rmse,
         'mape': mape,
         'predict_data_train': dataframe_to_json(train_result, 'BTC Price Predictions'),
-        'predict_data_test': dataframe_to_json(test_result, 'BTC Price Predictions')}
-    # with open("./tensorflow.log", "w") as f:
-    #     pass
+        'predict_data_test': dataframe_to_json(test_result, 'BTC Price Predictions'),
+        'history': history.history
+        }
+
     return js

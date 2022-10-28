@@ -130,7 +130,7 @@ if __name__ == "__main__":
     "Features": ["BTC-USD", "^DJI", "^GSPC"],
     "Index_features": ["BBANDS", "MA"],
     "Predicted_ticket": "BTC-USD",
-    "Lyers": [
+    "Layers": [
         {"units": 50, "dropout": 0.2}
     ],
     "Learning_rate": 0.01,
