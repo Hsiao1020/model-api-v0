@@ -11,10 +11,10 @@ CORS(app=app)
 def home():
     return "請不要關掉 app.py 拜託 感謝~"
 
-@app.before_request
-def limit_remote_addr():
-    if not request.remote_addr.startswith('140.119'):
-        abort(404)  # Forbidden
+# @app.before_request
+# def limit_remote_addr():
+#     if not request.remote_addr.startswith('140.119'):
+#         abort(404)  # Forbidden
 
 @app.route("/predict", methods=["POST"])
 def lstm_predict():
@@ -23,19 +23,19 @@ def lstm_predict():
     if not params:
         return jsonify({"Error": "Can't find any parameters"})
     else:
-        BEGIN = params['begin']
-        END = params['end']
-        FEATURES = params['features']
+        BEGIN = params['Begin']
+        END = params['End']
+        FEATURES = params['Features']
         OHLC = params['OHLC']
-        PREDICTED_TICKET = params['predicted_ticket'].upper()
-        INDEX_FEATURES = params['index_features']
-        RATIO_OF_TRAIN = params['ratio_of_train']
-        LOOK_BACK = params['look_back']
-        FORECAST_DAYS = params['forecast_days']
-        LAYERS = params['layers']
-        LEARNING_RATE = params['learning_rate']
-        EPOCHS = params['epochs']
-        BATCH_SIZE = params['batch_size']
+        PREDICTED_TICKET = params['Predicted_ticket'].upper()
+        INDEX_FEATURES = params['Index_features']
+        RATIO_OF_TRAIN = params['Ratio_of_train']
+        LOOK_BACK = params['Look_back']
+        FORECAST_DAYS = params['Forecast_days']
+        LAYERS = params['Layers']
+        LEARNING_RATE = params['Learning_rate']
+        EPOCHS = params['Epochs']
+        BATCH_SIZE = params['Batch_size']
 
         predict_data = predict(
             begin=BEGIN,
@@ -62,9 +62,9 @@ def get_index_all():
     if not params:
         return jsonify({"Error": "Can't find any parameters"})
     else:
-        BEGIN = params['begin']
-        END = params['end']
-        FEATURE = params['feature']
+        BEGIN = params['Begin']
+        END = params['End']
+        FEATURE = params['Feature']
         all_index = calculate_all_index(
             begin=BEGIN,
             end=END,
@@ -80,10 +80,10 @@ def get_index():
     if not params:
         return jsonify({"Error": "Can't find any parameters"})
     else:
-        BEGIN = params['begin']
-        END = params['end']
-        FEATURE = params['feature']
-        INDEX = params['index']
+        BEGIN = params['Begin']
+        END = params['End']
+        FEATURE = params['Feature']
+        INDEX = params['Index']
         index = calculate_index(
             begin=BEGIN,
             end=END,
@@ -100,10 +100,10 @@ def get_moving_average():
     if not params:
         return jsonify({"Error": "Can't find any parameters"})
     else:
-        BEGIN = params['begin']
-        END = params['end']
-        FEATURE = params['feature']
-        TIMEPERIOD = params['timeperiod']
+        BEGIN = params['Begin']
+        END = params['End']
+        FEATURE = params['Feature']
+        TIMEPERIOD = params['Timeperiod']
         index = calculate_moving_average(
             begin=BEGIN,
             end=END,
@@ -115,26 +115,26 @@ def get_moving_average():
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True, host='0.0.0.0', port=8888)
+    app.run(debug=True, host='0.0.0.0')
     # app.run(debug=True)
 
 
 # example params
 {
-    "begin": "2020-07-27",
-    "end": "2022-07-28",
-    "ratio_of_train": 0.7,
-    "look_back": 5,
-    "forecast_days": 1,
+    "Begin": "2020-07-27",
+    "End": "2022-07-28",
+    "Ratio_of_train": 0.7,
+    "Look_back": 5,
+    "Forecast_days": 1,
     "OHLC": "Adj Close",
-    "features": ["BTC-USD", "^DJI", "^GSPC"],
-    "index_features": ["BBANDS", "MA"],
-    "predicted_ticket": "BTC-USD",
-    "layers": [
+    "Features": ["BTC-USD", "^DJI", "^GSPC"],
+    "Index_features": ["BBANDS", "MA"],
+    "Predicted_ticket": "BTC-USD",
+    "Lyers": [
         {"units": 50, "dropout": 0.2}
     ],
-    "learning_rate": 0.01,
-    "epochs": 50,
-    "batch_size": 32
+    "Learning_rate": 0.01,
+    "Epochs": 50,
+    "Batch_size": 32
 }
 

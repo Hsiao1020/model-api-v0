@@ -9,6 +9,9 @@ from data import get_price_data, move_to_first_column, divide_into_train_and_tes
 from model import build_LSTM_Model
 import json
 
+def mean_absolute_percentage_error(actual, pred):
+    actual, pred = np.array(actual), np.array(pred)
+    return f"{round(np.mean(np.abs((actual - pred) / actual)) * 100, 2)}%"
 
 def predict(begin, end, features, OHLC, predict_ticket, index_features, ratio_of_train, look_back, forecast_days, layers, learning_rate, epochs, batch_size):
     data = get_price_data(begin, end, features)
@@ -91,15 +94,15 @@ def predict(begin, end, features, OHLC, predict_ticket, index_features, ratio_of
 
     mse = mean_squared_error(test_prediction.flatten(), Y_test.flatten())
     rmse = np.sqrt(mse)
+    mape = mean_absolute_percentage_error(Y_test.flatten(), test_prediction.flatten())
     print(f"rmse: {rmse}")
-    # logs = list()
-    # with open("./tensorflow.log", "r") as f:
-    #     logs = f.readlines()
+    print(f"mape: {mape}")
 
 
     js = {
         'mse': mse,
         'rmse': rmse,
+        'mape': mape,
         'predict_data_train': dataframe_to_json(train_result, 'BTC Price Predictions'),
         'predict_data_test': dataframe_to_json(test_result, 'BTC Price Predictions')}
     # with open("./tensorflow.log", "w") as f:
