@@ -5,7 +5,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 from talib import abstract
 
-from data import get_price_data, move_to_first_column, divide_into_train_and_test, split_sequence, dataframe_to_json, str_to_unixtime
+from data import get_price_data, move_to_first_column, divide_into_train_and_test, split_sequence, dataframe_to_price_and_time, str_to_unixtime
 from model import build_LSTM_Model
 import json
 
@@ -99,6 +99,8 @@ def predict(begin, end, features, OHLC, predict_ticket, index_features, ratio_of
     print(f"rmse: {rmse}")
     print(f"mape: {mape}")
 
+    train_data_price, train_data_time = dataframe_to_price_and_time(train_result, 'BTC Price Predictions')
+    test_data_price, test_data_time = dataframe_to_price_and_time(test_result, 'BTC Price Predictions')
 
     js = {
         'begin': str_to_unixtime(begin),
@@ -106,8 +108,10 @@ def predict(begin, end, features, OHLC, predict_ticket, index_features, ratio_of
         'mse': mse,
         'rmse': rmse,
         'mape': mape,
-        'predict_data_train': dataframe_to_json(train_result, 'BTC Price Predictions'),
-        'predict_data_test': dataframe_to_json(test_result, 'BTC Price Predictions'),
+        'predict_data_train_price': train_data_price,
+        'predict_data_train_time': train_data_time,
+        'predict_data_test_price': test_data_price,
+        'predict_data_test_time': test_data_time,
         'history': history.history
         }
 

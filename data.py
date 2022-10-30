@@ -42,6 +42,17 @@ def dataframe_to_json(df, column_name):
             result.append([int(dt_index[i]), float(df[column_name][i])])
     return result
 
+def dataframe_to_price_and_time(df, column_name):
+    result = []
+    dt_index = df.index.view(np.int64) // 10**6
+    price_list = []
+    time_list = []
+    for i in range(len(df)):
+        if not np.isnan(df[column_name][i]):
+            price_list.append(float(df[column_name][i]))
+            time_list.append(int(dt_index[i]))
+    return price_list, time_list
+
 def str_to_unixtime(s):
     s = f'{s} 08:00:00+08:00'
     unixtime = time.mktime(datetime.strptime(s, "%Y-%m-%d %H:%M:%S%z").timetuple())
