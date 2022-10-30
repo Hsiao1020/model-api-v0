@@ -5,13 +5,14 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 from talib import abstract
 
-from data import get_price_data, move_to_first_column, divide_into_train_and_test, split_sequence, dataframe_to_json
+from data import get_price_data, move_to_first_column, divide_into_train_and_test, split_sequence, dataframe_to_json, str_to_unixtime
 from model import build_LSTM_Model
 import json
 
 def mean_absolute_percentage_error(actual, pred):
     actual, pred = np.array(actual), np.array(pred)
     return f"{round(np.mean(np.abs((actual - pred) / actual)) * 100, 2)}%"
+
 
 def predict(begin, end, features, OHLC, predict_ticket, index_features, ratio_of_train, look_back, forecast_days, layers, learning_rate, epochs, batch_size):
     data = get_price_data(begin, end, features)
@@ -100,6 +101,8 @@ def predict(begin, end, features, OHLC, predict_ticket, index_features, ratio_of
 
 
     js = {
+        'begin': str_to_unixtime(begin),
+        'end': str_to_unixtime(end),
         'mse': mse,
         'rmse': rmse,
         'mape': mape,

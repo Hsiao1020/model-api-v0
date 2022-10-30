@@ -13,13 +13,13 @@ def build_LSTM_Model(look_back, forecast_days,  n_features, layers, learning_rat
     for i in range(1, len(layers)+1):
         # units
         if i == len(layers):
-            model.add(LSTM(units = layers[i-1]['units']))
+            model.add(LSTM(units = layers[i-1]))
         else:
-            model.add(LSTM(layers[i-1]['units'], return_sequences=True))
+            model.add(LSTM(layers[i-1], return_sequences=True))
         # dropout
-        dropout = layers[i-1]['dropout']
-        if dropout and type(dropout) is float and 1 > dropout > 0:
-            model.add(Dropout(dropout))
+        # dropout = layers[i-1]['dropout']
+        # if dropout and type(dropout) is float and 1 > dropout > 0:
+        #     model.add(Dropout(dropout))
 
     model.add(Dense(1, activation='linear'))
     model.compile(loss=losses.MeanSquaredError(),

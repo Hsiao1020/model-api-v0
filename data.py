@@ -1,7 +1,8 @@
 import numpy as np
 import yfinance as yf
 import pandas as pd
-
+from datetime import datetime
+import time
 
 def get_price_data(begin, end, features):
     data = yf.download(features, start=begin, end=end, interval='1d')
@@ -40,3 +41,8 @@ def dataframe_to_json(df, column_name):
         if not np.isnan(df[column_name][i]):
             result.append([int(dt_index[i]), float(df[column_name][i])])
     return result
+
+def str_to_unixtime(s):
+    s = f'{s} 08:00:00+08:00'
+    unixtime = time.mktime(datetime.strptime(s, "%Y-%m-%d %H:%M:%S%z").timetuple())
+    return unixtime
