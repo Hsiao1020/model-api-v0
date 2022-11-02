@@ -9,6 +9,7 @@ from data import get_price_data, move_to_first_column, divide_into_train_and_tes
 from model import build_LSTM_Model
 import json
 
+
 def mean_absolute_percentage_error(actual, pred):
     actual, pred = np.array(actual), np.array(pred)
     return f"{round(np.mean(np.abs((actual - pred) / actual)) * 100, 2)}%"
@@ -25,7 +26,8 @@ def predict(begin, end, features, OHLC, predict_ticket, index_features, ratio_of
 
     if index_features:
         ohlc_df = get_price_data(begin, end, predict_ticket)
-        ohlc_df.rename(columns={'Open': 'open', 'High': 'high', 'Low': 'low', 'Close': 'close', 'Volume': 'volume'}, inplace=True)
+        ohlc_df.rename(columns={'Open': 'open', 'High': 'high', 'Low': 'low',
+                       'Close': 'close', 'Volume': 'volume'}, inplace=True)
         ohlc_df = ohlc_df.astype('float')
         for ta in index_features:
             output = eval('abstract.'+ta+'(ohlc_df)')
@@ -35,18 +37,19 @@ def predict(begin, end, features, OHLC, predict_ticket, index_features, ratio_of
             # except:
             #     print(f'error: {ta}')
 
-    df = df.fillna(method='ffill') # 假日時可能為 NA 值，使用前面最近的值取代
-    df = df.fillna(method='bfill') # 若還是有 NA 值，使用後面最近的值取代
-
+    df = df.fillna(method='ffill')  # 假日時可能為 NA 值，使用前面最近的值取代
+    df = df.fillna(method='bfill')  # 若還是有 NA 值，使用後面最近的值取代
 
     print(df)
 
     # 分訓練集、測試集
     df_train, df_test = divide_into_train_and_test(df, ratio_of_train)
+
     # 依據前測天數和預測天數切分資料
     X_train, Y_train = split_sequence(
         df_train.values, look_back, forecast_days)
     X_test, Y_test = split_sequence(df_test.values, look_back, forecast_days)
+
     # X 資料集正規化
     X_scaler = MinMaxScaler(feature_range=(0, 1))
 
@@ -74,6 +77,9 @@ def predict(begin, end, features, OHLC, predict_ticket, index_features, ratio_of
 
     # 預測訓練集資料
     train_prediction = lstm_model.predict(X_train_norm)
+    # 預測資料
+    forecast_prediction = lstm_model.predict(X_test[-forecast_days:])
+
     # X資料集反正規化
     X_pred_scaler = MinMaxScaler()
     X_pred_scaler.min_, X_pred_scaler.scale_ = X_scaler.min_[
@@ -82,7 +88,7 @@ def predict(begin, end, features, OHLC, predict_ticket, index_features, ratio_of
     d_train = {'Actual ': Y_train.flatten(
     ), 'BTC Price Predictions': train_prediction.flatten()}
     train_result = pd.DataFrame(
-        data=d_train, index=df.index[-len(train_prediction):])
+        data=d_train, index=df.index[look_back:(look_back+len(train_prediction))])
 
     # 預測測試集資料
     test_prediction = lstm_model.predict(X_test_norm)
@@ -95,12 +101,14 @@ def predict(begin, end, features, OHLC, predict_ticket, index_features, ratio_of
 
     mse = mean_squared_error(test_prediction.flatten(), Y_test.flatten())
     rmse = np.sqrt(mse)
-    mape = mean_absolute_percentage_error(Y_test.flatten(), test_prediction.flatten())
+    mape = mean_absolute_percentage_error(
+        Y_test.flatten(), test_prediction.flatten())
     print(f"rmse: {rmse}")
     print(f"mape: {mape}")
-
-    train_data_price, train_data_time = dataframe_to_price_and_time(train_result, 'BTC Price Predictions')
-    test_data_price, test_data_time = dataframe_to_price_and_time(test_result, 'BTC Price Predictions')
+    train_data_price, train_data_time = dataframe_to_price_and_time(
+        train_result, 'BTC Price Predictions')
+    test_data_price, test_data_time = dataframe_to_price_and_time(
+        test_result, 'BTC Price Predictions')
 
     js = {
         'begin': str_to_unixtime(begin),
@@ -113,6 +121,6 @@ def predict(begin, end, features, OHLC, predict_ticket, index_features, ratio_of
         'predict_data_test_price': test_data_price,
         'predict_data_test_time': test_data_time,
         'history': history.history
-        }
+    }
 
     return js

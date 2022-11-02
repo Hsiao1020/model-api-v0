@@ -4,19 +4,21 @@ import pandas as pd
 from datetime import datetime
 import time
 
+
 def get_price_data(begin, end, features):
     data = yf.download(features, start=begin, end=end, interval='1d')
-    data.index = pd.DatetimeIndex(data.index).tz_localize('UTC').tz_convert('Asia/Taipei')
+    data.index = pd.DatetimeIndex(data.index).tz_localize(
+        'UTC').tz_convert('Asia/Taipei')
     # data.index = data.index.tz_localize('UTC').tz_convert('Asia/Taipei')
-    data = data.fillna(method='ffill') # 假日時可能為 NA 值，使用前面最近的值取代
-    data = data.fillna(method='bfill') # 若還是有 NA 值，使用後面最近的值取代
+    data = data.fillna(method='ffill')  # 假日時可能為 NA 值，使用前面最近的值取代
+    data = data.fillna(method='bfill')  # 若還是有 NA 值，使用後面最近的值取代
     return data
 
 
 # 將要預測的欄位移至第一欄
 def move_to_first_column(df, column_name):
     col = df.pop(column_name)
-    df.insert(loc=0 , column=column_name, value=col)
+    df.insert(loc=0, column=column_name, value=col)
     return df
 
 
@@ -28,11 +30,12 @@ def divide_into_train_and_test(df, ratio_of_train=0.7):
 
 # 根據輸入的天數切分資料
 def split_sequence(data, look_back, forecast_days):
-    X,Y = [],[]
-    for i in range(0,len(data)-look_back-forecast_days +1):
+    X, Y = [], []
+    for i in range(0, len(data)-look_back-forecast_days + 1):
         X.append(data[i:(i+look_back)])
         Y.append(data[i+look_back][0])
     return np.array(X), np.array(Y).reshape((np.array(Y).shape[0], 1))
+
 
 def dataframe_to_json(df, column_name):
     result = []
@@ -41,6 +44,7 @@ def dataframe_to_json(df, column_name):
         if not np.isnan(df[column_name][i]):
             result.append([int(dt_index[i]), float(df[column_name][i])])
     return result
+
 
 def dataframe_to_price_and_time(df, column_name):
     result = []
@@ -53,7 +57,9 @@ def dataframe_to_price_and_time(df, column_name):
             time_list.append(int(dt_index[i]))
     return price_list, time_list
 
+
 def str_to_unixtime(s):
     s = f'{s} 08:00:00+08:00'
-    unixtime = time.mktime(datetime.strptime(s, "%Y-%m-%d %H:%M:%S%z").timetuple())
+    unixtime = time.mktime(datetime.strptime(
+        s, "%Y-%m-%d %H:%M:%S%z").timetuple())
     return unixtime
