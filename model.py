@@ -7,13 +7,14 @@ from tensorflow.keras.metrics import RootMeanSquaredError, MeanSquaredError
 from tensorflow.keras.optimizers import Adam
 import logging
 
+
 def build_LSTM_Model(look_back, forecast_days,  n_features, layers, learning_rate=0.0001):
     model = Sequential()
     model.add(InputLayer(input_shape=(look_back, n_features)))
     for i in range(1, len(layers)+1):
         # units
         if i == len(layers):
-            model.add(LSTM(units = layers[i-1]))
+            model.add(LSTM(units=layers[i-1]))
         else:
             model.add(LSTM(layers[i-1], return_sequences=True))
         # dropout

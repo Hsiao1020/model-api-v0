@@ -16,6 +16,7 @@ def home():
 #     if not request.remote_addr.startswith('140.119'):
 #         abort(404)  # Forbidden
 
+
 @app.route("/predict", methods=["POST"])
 def lstm_predict():
     params = request.get_json()
@@ -31,7 +32,9 @@ def lstm_predict():
         INDEX_FEATURES = params['Index_features']
         RATIO_OF_TRAIN = params['Ratio_of_train']
         LOOK_BACK = params['Look_back']
-        FORECAST_DAYS = params['Forecast_days']
+        # 目前先設計一天
+        # FORECAST_DAYS = params['Forecast_days']
+        FORECAST_DAYS = 1
         LAYERS = params['Layers']
         LEARNING_RATE = params['Learning_rate']
         EPOCHS = params['Epochs']
@@ -55,6 +58,7 @@ def lstm_predict():
 
         return jsonify(predict_data)
 
+
 @app.route("/index/all", methods=["POST"])
 def get_index_all():
     params = request.get_json()
@@ -72,6 +76,7 @@ def get_index_all():
         )
 
         return jsonify(all_index)
+
 
 @app.route("/index", methods=["POST"])
 def get_index():
@@ -92,6 +97,7 @@ def get_index():
         )
 
         return jsonify(index)
+
 
 @app.route("/index/ma", methods=["POST"])
 def get_moving_average():
@@ -135,4 +141,3 @@ if __name__ == "__main__":
     "Epochs": 50,
     "Batch_size": 32
 }
-

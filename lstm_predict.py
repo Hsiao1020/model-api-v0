@@ -9,6 +9,8 @@ from data import get_price_data, move_to_first_column, divide_into_train_and_tes
 from model import build_LSTM_Model
 import json
 
+ONE_DAY_MILLISECONDS = 86400000
+
 
 def mean_absolute_percentage_error(actual, pred):
     actual, pred = np.array(actual), np.array(pred)
@@ -63,10 +65,16 @@ def predict(begin, end, features, OHLC, predict_ticket, index_features, ratio_of
     X_test_norm = X_scaler.transform(d2_X_test)
     X_test_norm = X_test_norm.reshape(nsamples, nx, ny)
 
+    forecast_data = np.array(df_test)[-look_back-1:-1]
+    nx, ny = forecast_data.shape
+    d2_forecast_data = forecast_data.reshape((1, nx*ny))
+    forecast_data_norm = X_scaler.transform(d2_forecast_data)
+    forecast_data_norm = forecast_data_norm.reshape(1, nx, ny)
+
     # Y 資料集正規化
     Y_scaler = MinMaxScaler(feature_range=(0, 1))
     Y_train_norm = Y_scaler.fit_transform(Y_train)
-    Y_test_norm = Y_scaler.transform(Y_test)
+    # Y_test_norm = Y_scaler.transform(Y_test)
 
     lstm_model = build_LSTM_Model(
         look_back, forecast_days, len(df.columns), layers, learning_rate)
@@ -77,16 +85,12 @@ def predict(begin, end, features, OHLC, predict_ticket, index_features, ratio_of
 
     # 預測訓練集資料
     train_prediction = lstm_model.predict(X_train_norm)
-    # 預測資料
-    forecast_prediction = lstm_model.predict(X_test[-forecast_days:])
-
-    # X資料集反正規化
-    X_pred_scaler = MinMaxScaler()
-    X_pred_scaler.min_, X_pred_scaler.scale_ = X_scaler.min_[
-        0], X_scaler.scale_[0]
-    train_prediction = X_pred_scaler.inverse_transform(train_prediction)
-    d_train = {'Actual ': Y_train.flatten(
-    ), 'BTC Price Predictions': train_prediction.flatten()}
+    # 訓練集反正規化
+    train_prediction = Y_scaler.inverse_transform(train_prediction)
+    d_train = {
+        'Actual ': Y_train.flatten(),
+        'BTC Price Predictions': train_prediction.flatten()
+    }
     train_result = pd.DataFrame(
         data=d_train, index=df.index[look_back:(look_back+len(train_prediction))])
 
@@ -94,10 +98,18 @@ def predict(begin, end, features, OHLC, predict_ticket, index_features, ratio_of
     test_prediction = lstm_model.predict(X_test_norm)
     # Y資料集反正規化
     test_prediction = Y_scaler.inverse_transform(test_prediction)
-    d_test = {'Actual ': Y_test.flatten(
-    ), 'BTC Price Predictions': test_prediction.flatten()}
+    d_test = {
+        'Actual ': Y_test.flatten(),
+        'BTC Price Predictions': test_prediction.flatten()
+    }
     test_result = pd.DataFrame(
         data=d_test, index=df.index[-len(test_prediction):])
+
+    # 預測未來資料
+    forecast_prediction = lstm_model.predict(forecast_data_norm)
+    # 未來資料反正規化
+    forecast_prediction = float(
+        Y_scaler.inverse_transform(forecast_prediction)[0])
 
     mse = mean_squared_error(test_prediction.flatten(), Y_test.flatten())
     rmse = np.sqrt(mse)
@@ -120,6 +132,8 @@ def predict(begin, end, features, OHLC, predict_ticket, index_features, ratio_of
         'predict_data_train_time': train_data_time,
         'predict_data_test_price': test_data_price,
         'predict_data_test_time': test_data_time,
+        'predict_data_forecast_price': forecast_prediction,
+        'predict_data_forecast_time': [test_data_time[-1]+ONE_DAY_MILLISECONDS],
         'history': history.history
     }
 
