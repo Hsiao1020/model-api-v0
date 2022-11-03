@@ -133,7 +133,7 @@ def predict(begin, end, features, OHLC, predict_ticket, index_features, ratio_of
         'predict_data_test_price': test_data_price,
         'predict_data_test_time': test_data_time,
         'predict_data_forecast_price': forecast_prediction,
-        'predict_data_forecast_time': [test_data_time[-1]+ONE_DAY_MILLISECONDS],
+        'predict_data_forecast_time': test_data_time[-1]+ONE_DAY_MILLISECONDS,
         'history': history.history
     }
 
