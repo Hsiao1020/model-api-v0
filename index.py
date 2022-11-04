@@ -5,9 +5,11 @@ from talib import abstract
 import pandas as pd
 import numpy as np
 
+
 def calculate_all_index(begin, end, feature):
     df = get_price_data(begin, end, [feature])
-    df.rename(columns={'Open': 'open', 'High': 'high', 'Low': 'low', 'Close': 'close', 'Volume': 'volume'}, inplace=True)
+    df.rename(columns={'Open': 'open', 'High': 'high', 'Low': 'low',
+              'Close': 'close', 'Volume': 'volume'}, inplace=True)
 
     df = df.astype('float')
     ta_list = talib.get_functions()
@@ -19,7 +21,8 @@ def calculate_all_index(begin, end, feature):
             # 如果輸出是一維資料，幫這個指標取名為 x 本身；多維資料則不需命名
             output.name = index.lower() if type(output) == pd.core.series.Series else None
             # 透過 merge 把輸出結果併入 df DataFrame
-            df = pd.merge(df, pd.DataFrame(output), left_on=df.index, right_on=output.index)
+            df = pd.merge(df, pd.DataFrame(output),
+                          left_on=df.index, right_on=output.index)
             df = df.set_index('key_0')
         except:
             print(f'error: {index}')
@@ -40,7 +43,8 @@ def calculate_all_index(begin, end, feature):
 
 def calculate_index(begin, end, feature, index):
     df = get_price_data(begin, end, [feature])
-    df.rename(columns={'Open': 'open', 'High': 'high', 'Low': 'low', 'Close': 'close', 'Volume': 'volume'}, inplace=True)
+    df.rename(columns={'Open': 'open', 'High': 'high', 'Low': 'low',
+              'Close': 'close', 'Volume': 'volume'}, inplace=True)
     df = df.astype('float')
 
     ta_list = talib.get_functions()

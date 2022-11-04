@@ -18,6 +18,7 @@ def mean_absolute_percentage_error(actual, pred):
 
 
 def predict(begin, end, features, OHLC, predict_ticket, index_features, ratio_of_train, look_back, forecast_days, layers, learning_rate, epochs, batch_size):
+    features = list(filter(lambda a: a != "", features))
     data = get_price_data(begin, end, features)
     df = data[OHLC]
 
@@ -26,6 +27,7 @@ def predict(begin, end, features, OHLC, predict_ticket, index_features, ratio_of
     elif type(df) is pd.core.series.Series:
         df = df.to_frame(name=predict_ticket)
 
+    index_features = list(filter(lambda a: a != "", index_features))
     if index_features:
         ohlc_df = get_price_data(begin, end, predict_ticket)
         ohlc_df.rename(columns={'Open': 'open', 'High': 'high', 'Low': 'low',
